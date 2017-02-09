@@ -1,10 +1,11 @@
 import urllib
 import os
-import sys
 import numpy as np
+from PIL import Image
 
 class Shot:
     link = 'http://golem.fjfi.cvut.cz/utils/data/'
+    link_img = 'http://golem.fjfi.cvut.cz/shots/'
     baseDir = 'shots'
     vacuumHistory = 200
     similarVacuum = 5
@@ -20,7 +21,7 @@ class Shot:
         self.plasma = None
         self.ub_limit = None
         self.ucd_limit = None
-        self.mc1 = None
+        self.img = None
 
 
     def __getitem__(self, item):
@@ -42,6 +43,8 @@ class Shot:
             return float(self.__getUbLimit__())
         elif item == 'ucd':
             return float(self.__getUcdLimit__())
+        elif item == 'vert_camera':
+            return self.__getVertCamera__()
         raise AttributeError("Unknown diagnostics '" + item + "'")
 
 
@@ -79,6 +82,10 @@ class Shot:
             self.ucd_limit = float(self.__loadSingleValue__('ucd'))
         return self.ucd_limit
 
+    def __getVertCamera__(self):
+        if not self.img:
+            self.img = self.__loadImage__('vert_camera.png', 'diagnostics/Radiation/0211FastCamera.ON/1/CorrectedRGB.png')
+        return self.img
 
     # def getMc1(self):
     #     if not self.mc1:
@@ -86,17 +93,27 @@ class Shot:
     #     return self.mc1
 
 
-    def __loadData__(self, path):
+    def __loadData__(self, path, url=None, base_url=None, binary=False):
+        if not base_url:
+            base_url = Shot.link
+        if not url:
+            url = path
         if not os.path.exists(os.path.join(self.shotDir, path)):
-            url = urllib.urlopen(Shot.link + str(self.shotNo) + '/' + path)
-            f = open(os.path.join(self.shotDir, path), 'w')
-            myfile = url.read()
+            url_link = urllib.urlopen(base_url + str(self.shotNo) + '/' + url)
+            f = open(os.path.join(self.shotDir, path), 'w' + ('b' if binary else ''))
+            myfile = url_link.read()
             f.write(myfile)
             f.close()
-        return open(os.path.join(self.shotDir, path), 'r')
+        return open(os.path.join(self.shotDir, path), 'r' + ('b' if binary else ''))
 
-    def __loadDataArray__(self, path):
-        return np.loadtxt(self.__loadData__(path)).transpose()
+    def __loadImage__(self, path, url=None):
+        img = Image.open(self.__loadData__(path, url, Shot.link_img, 'wb')).convert('LA')
+        return np.array(img)
 
-    def __loadSingleValue__(self, path):
-        return self.__loadData__(path).read()
+
+    def __loadDataArray__(self, path, url=None):
+        return np.loadtxt(self.__loadData__(path, url)).transpose()
+
+    def __loadSingleValue__(self, path, url=None):
+        return self.__loadData__(path, url).read()
+

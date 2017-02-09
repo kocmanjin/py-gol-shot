@@ -11,6 +11,8 @@ class Shot:
     similarVacuum = 5
 
     def __init__(self, shotNo):
+        if not os.path.exists(Shot.baseDir):
+            os.mkdir(Shot.baseDir)
         self.shotNo = int(shotNo)
         self.shotDir = os.path.join(Shot.baseDir, str(shotNo))
         if not os.path.exists(self.shotDir):

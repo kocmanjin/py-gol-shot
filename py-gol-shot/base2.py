@@ -1,14 +1,32 @@
 from Shot import Shot
-import os
+from SigMod import *
+import numpy as np
+import sys
 import urllib
+import matplotlib.pyplot as plt
+
+
 shot = Shot(23186)
 
-img = shot['mirnov_1']
+# img = shot['mirnov_1']
 img = shot['vert_camera']
 
-print img.shape, img.dtype
+print img.shape
 
-print len(img[200][100])
+dz_old = getCenterOfMassOld(img)
+time = np.arange(0, len(dz_old))
+plt.plot(time, dz_old, label='dz')
+plt.show()
+
+
+# print img.shape, img.dtype
+
+# f = open("test.txt", "w")
+
+# for i in range(len(img)):
+#     for j in range(len(img[i])):
+#         f.write(str(i) + " " + str(j) + " " + str(img[i][j]) + "\n")
+#     f.write("\n")
 
 # print img.shape()
 # base_url = Shot.link_img

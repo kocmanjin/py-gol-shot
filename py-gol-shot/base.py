@@ -3,9 +3,9 @@ from SigMod import *
 from Shot import Shot
 import matplotlib.pyplot as plt
 
-shot = Shot(23206)
+shot = Shot(23191)
 # vacuum = getVacuum(shot)
-vacuum = Shot(23207)
+vacuum = Shot(23192)
 print vacuum['shotno']
 # shot1 = Shot(23061)
 time, mc5_p = shot['mirnov_5']
@@ -42,6 +42,12 @@ dz = 93 * (mc5 - mc13)/(mc5 + mc13)
 dz[abs(mc5) < 0.001] = float('NaN')
 dz[abs(mc13) < 0.001] = float('NaN')
 
+img = shot['vert_camera']
+dz_c = getCenterOfMassOld(img)
+time_c = getCameraTime(img)
+plt.plot(time_c, dz_c, label='dz')
+
+time -= shot['plasma_start']
 plt.plot(time, dz)
 # plt.plot(time, np.zeros(shape=len(dz)), label='dz')
 # print len(curr)

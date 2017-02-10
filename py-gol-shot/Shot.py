@@ -23,6 +23,7 @@ class Shot:
         self.plasma = None
         self.ub_limit = None
         self.ucd_limit = None
+        self.plasma_start = None
         self.img = None
 
 
@@ -45,6 +46,8 @@ class Shot:
             return float(self.__getUbLimit__())
         elif item == 'ucd':
             return float(self.__getUcdLimit__())
+        elif item == 'plasma_start':
+            return float(self.__getPlasmaStart__())
         elif item == 'vert_camera':
             return self.__getVertCamera__()
         raise AttributeError("Unknown diagnostics '" + item + "'")
@@ -84,6 +87,11 @@ class Shot:
             self.ucd_limit = float(self.__loadSingleValue__('ucd'))
         return self.ucd_limit
 
+    def __getPlasmaStart__(self):
+        if not self.plasma_start:
+            self.plasma_start = float(self.__loadSingleValue__('plasma_start'))
+        return self.plasma_start
+
     def __getVertCamera__(self):
         if not self.img:
             self.img = self.__loadImage__('vert_camera.png', 'diagnostics/Radiation/0211FastCamera.ON/1/CorrectedRGB.png')
@@ -109,7 +117,8 @@ class Shot:
         return open(os.path.join(self.shotDir, path), 'r' + ('b' if binary else ''))
 
     def __loadImage__(self, path, url=None):
-        img = Image.open(self.__loadData__(path, url, Shot.link_img, 'wb')).convert('LA')
+        img = Image.open(self.__loadData__(path, url, Shot.link_img, 'wb')).convert('L')
+        img = np.flip(img, 0).transpose()
         return np.array(img)
 
 

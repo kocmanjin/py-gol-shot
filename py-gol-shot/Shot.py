@@ -3,28 +3,35 @@ import os
 import numpy as np
 from PIL import Image
 
+HTTP_DATA_LINK = 'http://golem.fjfi.cvut.cz/utils/data/'
+SAVE_DIR = 'shots'
+
 class Shot:
     link = 'http://golem.fjfi.cvut.cz/utils/data/'
-    link_img = 'http://golem.fjfi.cvut.cz/shots/'
+    link_homepage = 'http://golem.fjfi.cvut.cz/shots/'
     baseDir = 'shots'
     vacuumHistory = 200
     similarVacuum = 5
 
     def __init__(self, shotNo):
-        if not os.path.exists(Shot.baseDir):
-            os.mkdir(Shot.baseDir)
         self.shotNo = int(shotNo)
-        self.shotDir = os.path.join(Shot.baseDir, str(shotNo))
-        if not os.path.exists(self.shotDir):
-            os.mkdir(self.shotDir)
+        if (SAVE_DIR is not None):
+            self.shotDir = os.path.join(SAVE_DIR, str(shotNo))
+            # if not os.path.exists(SAVE_DIR):
+            #     os.mkdir(SAVE_DIR)
+            if not os.path.exists(self.shotDir):
+                os.mkdir(self.shotDir)
         self.papouchST = None
+        self.papouchKO = None
         self.plasma_current = None
         self.loopVoltage = None
         self.plasma = None
         self.ub_limit = None
         self.ucd_limit = None
+        self.wwwcomment = None
         self.plasma_start = None
         self.img = None
+        self.rigolC = None
 
 
     def __getitem__(self, item):
@@ -36,8 +43,12 @@ class Shot:
             return self.__getPapouchST__()[0], self.__getPapouchST__()[3]
         elif item == 'mirnov_13':
             return self.__getPapouchST__()[0], self.__getPapouchST__()[4]
+        elif item == 'papouchKo':
+            return self.__getPapouchKO__()
         elif item == 'plasma_current':
             return self.__getPlasmaCurrent__()[0], self.__getPlasmaCurrent__()[1]
+        elif item == 'rigolC':
+            return self.__getRigolC__()
         elif item == 'plasma':
             return float(self.__getPlasma__())
         elif item == 'shotno':
@@ -48,10 +59,11 @@ class Shot:
             return float(self.__getUcdLimit__())
         elif item == 'plasma_start':
             return float(self.__getPlasmaStart__())
+        elif item == 'wwwcomment':
+            return self.__getWwwComment__()
         elif item == 'vert_camera':
             return self.__getVertCamera__()
         raise AttributeError("Unknown diagnostics '" + item + "'")
-
 
 
     def __getShotNo__(self):
@@ -63,9 +75,19 @@ class Shot:
         return self.loopVoltage
 
     def __getPapouchST__(self):
-        if self.papouchST == None:
+        if self.papouchST is None:
             self.papouchST = self.__loadDataArray__('papouch_st')
         return self.papouchST
+
+    def __getPapouchKO__(self):
+        if self.papouchKO == None:
+            self.papouchKO = self.__loadDataArray__('papouch_ko')
+        return self.papouchKO
+
+    def __getRigolC__(self):
+        if self.rigolC == None:
+            self.rigolC = self.__loadDataArrayHomepage__('rigolC', 'DAS/0417RigolDS1074c.ON/data_all')
+        return self.rigolC
 
     def __getPlasmaCurrent__(self):
         if self.plasma_current == None:
@@ -86,6 +108,11 @@ class Shot:
         if not self.ucd_limit:
             self.ucd_limit = float(self.__loadSingleValue__('ucd'))
         return self.ucd_limit
+
+    def __getWwwComment__(self):
+        if not self.wwwcomment:
+            self.wwwcomment = self.__loadSingleValue__('wwwcomment')
+        return self.wwwcomment
 
     def __getPlasmaStart__(self):
         if not self.plasma_start:
@@ -109,6 +136,8 @@ class Shot:
         if not url:
             url = path
         if not os.path.exists(os.path.join(self.shotDir, path)):
+            link = base_url + str(self.shotNo) + '/' + url
+            print link
             url_link = urllib.urlopen(base_url + str(self.shotNo) + '/' + url)
             f = open(os.path.join(self.shotDir, path), 'w' + ('b' if binary else ''))
             myfile = url_link.read()
@@ -117,10 +146,13 @@ class Shot:
         return open(os.path.join(self.shotDir, path), 'r' + ('b' if binary else ''))
 
     def __loadImage__(self, path, url=None):
-        img = Image.open(self.__loadData__(path, url, Shot.link_img, 'wb')).convert('L')
+        img = Image.open(self.__loadData__(path, url, Shot.link_homepage, 'wb')).convert('L')
         img = np.flip(img, 0).transpose()
         return np.array(img)
 
+    def __loadDataArrayHomepage__(self, path, url):
+        dat = self.__loadData__(path, url, Shot.link_homepage)
+        return np.loadtxt(dat).transpose()
 
     def __loadDataArray__(self, path, url=None):
         return np.loadtxt(self.__loadData__(path, url)).transpose()

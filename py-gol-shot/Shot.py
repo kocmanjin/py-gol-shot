@@ -3,8 +3,8 @@ import os
 import numpy as np
 from PIL import Image
 
-HTTP_DATA_LINK = 'http://golem.fjfi.cvut.cz/utils/data/'
-SAVE_DIR = 'shots'
+# HTTP_DATA_LINK = 'http://golem.fjfi.cvut.cz/utils/data/'
+# SAVE_DIR = 'shots'
 
 class Shot:
     link = 'http://golem.fjfi.cvut.cz/utils/data/'
@@ -15,8 +15,8 @@ class Shot:
 
     def __init__(self, shotNo):
         self.shotNo = int(shotNo)
-        if (SAVE_DIR is not None):
-            self.shotDir = os.path.join(SAVE_DIR, str(shotNo))
+        if (Shot.baseDir is not None):
+            self.shotDir = os.path.join(Shot.baseDir, str(shotNo))
             # if not os.path.exists(SAVE_DIR):
             #     os.mkdir(SAVE_DIR)
             if not os.path.exists(self.shotDir):
@@ -137,7 +137,7 @@ class Shot:
             url = path
         if not os.path.exists(os.path.join(self.shotDir, path)):
             link = base_url + str(self.shotNo) + '/' + url
-            print link
+            print(link)
             url_link = urllib.urlopen(base_url + str(self.shotNo) + '/' + url)
             f = open(os.path.join(self.shotDir, path), 'w' + ('b' if binary else ''))
             myfile = url_link.read()

@@ -1,12 +1,13 @@
 # from pygolem_lite import Shot
-from Shot import Shot
-from SigMod import *
+# from SigMod import *
 
 
-class GolemShot(Shot):
+class GolemShot:
 
-    def __init__(self, shotNo):
-        Shot.__init__(self, shotNo)
+    shots_dir = "c:\\Users\\kocman\\Documents"
+
+    def __init__(self, shotNo: int):
+        # Shot.__init__(self, shotNo)
         # self.shot = Shot(shotNo)
         # Shot.__init__(self, str(shotNo))
         self.mirnovIntegrated = None

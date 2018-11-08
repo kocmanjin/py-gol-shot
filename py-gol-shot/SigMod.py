@@ -11,6 +11,10 @@ def integrate(array, dt = 1e-6, aver_line = 4500, coeff = 1):
 def movingAverage(array, dim):
     return np.convolve(array, np.ones((dim,)) / dim, mode='same')
 
+def movingAverage2(array, dim):
+    cumsum = np.cumsum(np.insert(array, 0, 0))
+    return (cumsum[dim:] - cumsum[:-dim]) / float(dim)
+
 def getCenterOfMassOld(array):
     result = np.zeros(len(array))
     for i in range(len(array)):

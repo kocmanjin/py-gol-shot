@@ -1,16 +1,10 @@
-from Shot import Shot
-from Shot2 import Shot2
+import re
 
 
-
-
-# config = configparser.ConfigParser()
-# config.read("c:\\Users\\kocman\\Documents\\26237\\das_configuration.cfg")
-# print(config.sections())
-
-
-
-shot = Shot(26345)
-
-
+item = "0714RgilDS1054e.ON"
+print(item)
+name  = re.sub('(\d+)([a-zA-Z][\w\ ]+)([\.\w]+)', r'\2',  item)
+print(name)
+name = re.sub('([\w]+)/([a-zA-Z[\w\ ]+)', r'\2',  name)
+print(name)
 exit()

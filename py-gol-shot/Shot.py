@@ -1,4 +1,4 @@
-import urllib
+import urllib.request
 import os
 import numpy as np
 from PIL import Image
@@ -30,6 +30,7 @@ class Shot:
         self.ucd_limit = None
         self.wwwcomment = None
         self.plasma_start = None
+        self.plasma_end = None
         self.img = None
         self.rigolC = None
 
@@ -59,6 +60,8 @@ class Shot:
             return float(self.__getUcdLimit__())
         elif item == 'plasma_start':
             return float(self.__getPlasmaStart__())
+        elif item == 'plasma_end':
+            return float(self.__getPlasmaEnd__())
         elif item == 'wwwcomment':
             return self.__getWwwComment__()
         elif item == 'vert_camera':
@@ -119,6 +122,11 @@ class Shot:
             self.plasma_start = float(self.__loadSingleValue__('plasma_start'))
         return self.plasma_start
 
+    def __getPlasmaEnd__(self):
+        if not self.plasma_end:
+            self.plasma_end = float(self.__loadSingleValue__('plasma_end'))
+        return self.plasma_end
+
     def __getVertCamera__(self):
         if not self.img:
             self.img = self.__loadImage__('vert_camera.png', 'diagnostics/Radiation/0211FastCamera.ON/1/CorrectedRGB.png')
@@ -138,9 +146,10 @@ class Shot:
         if not os.path.exists(os.path.join(self.shotDir, path)):
             link = base_url + str(self.shotNo) + '/' + url
             print(link)
-            url_link = urllib.urlopen(base_url + str(self.shotNo) + '/' + url)
+            url_link = urllib.request.urlopen(base_url + str(self.shotNo) + '/' + url)
+            # url_link = urllib.urlopen(base_url + str(self.shotNo) + '/' + url)
             f = open(os.path.join(self.shotDir, path), 'w' + ('b' if binary else ''))
-            myfile = url_link.read()
+            myfile = url_link.read().decode()
             f.write(myfile)
             f.close()
         return open(os.path.join(self.shotDir, path), 'r' + ('b' if binary else ''))
